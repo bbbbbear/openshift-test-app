@@ -11,11 +11,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building application...'
-                sh '''
+                sh """
                 # 安裝依賴並打包應用程式
                 npm install
                 tar -czf app.tar.gz *
-                '''
+                """
             }
         }
 
