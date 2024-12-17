@@ -1,6 +1,10 @@
 pipeline {
-    agent any
-
+    agent {
+        docker {
+            image 'node:18'  // 使用官方 Node.js 18 容器
+            args '-u root'   // 確保擁有權限安裝依賴
+        }
+    }
     stages {
         stage('Build') {
             steps {
