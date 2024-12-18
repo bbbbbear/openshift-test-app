@@ -1,5 +1,19 @@
 pipeline {
-    agent any
+    agent{
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: nodejs
+    image: node:18   # 官方 Node.js 映像，內建 npm
+    command:
+    - cat
+    tty: true
+"""
+        }
+    }
     stages {
         stage('Build') {
             steps {
