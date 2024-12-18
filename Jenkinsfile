@@ -11,9 +11,20 @@ spec:
     command:
     - cat
     tty: true
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+  - name: jnlp
+    image: jenkins/inbound-agent:3107.v665000b_51092-15
     env:
     - name: HOME
       value: /home/jenkins/agent
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+  volumes:
+  - emptyDir: {}
+    name: "workspace-volume"
 """
         }
     }
