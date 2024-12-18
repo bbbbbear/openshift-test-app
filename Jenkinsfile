@@ -1,8 +1,20 @@
 pipeline {
     agent {
-        docker {
-            image 'node:18'  // 使用官方 Node.js 18 容器
-            args '-u root'   // 確保擁有權限安裝依賴
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    jenkins: slave
+spec:
+  containers:
+  - name: nodejs
+    image: node:18
+    command:
+    - cat
+    tty: true
+"""
         }
     }
     stages {
@@ -10,7 +22,6 @@ pipeline {
             steps {
                 echo 'Building application...'
                 sh '''
-                # 安裝依賴並打包應用程式
                 npm install
                 tar -czf app.tar.gz *
                 '''
@@ -44,14 +55,6 @@ pipeline {
                 oc expose svc/openshift-test-app -n test-app || true
                 '''
             }
-        }
-    }
-    post {
-        success {
-            echo 'Deployment completed successfully!'
-        }
-        failure {
-            echo 'Deployment failed!'
         }
     }
 }
