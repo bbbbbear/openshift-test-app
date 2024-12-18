@@ -7,10 +7,13 @@ kind: Pod
 spec:
   containers:
   - name: nodejs
-    image: node:18   # 官方 Node.js 映像，內建 npm
+    image: node:18
     command:
     - cat
     tty: true
+    env:
+    - name: HOME
+      value: /home/jenkins/agent
 """
         }
     }
