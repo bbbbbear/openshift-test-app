@@ -1,22 +1,5 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    jenkins: slave
-spec:
-  containers:
-  - name: nodejs
-    image: node:18
-    command:
-    - cat
-    tty: true
-"""
-        }
-    }
+    agent any
     stages {
         stage('Build') {
             steps {
@@ -32,29 +15,28 @@ spec:
             steps {
                 echo 'Building Docker image...'
                 sh '''
-                docker build -t image-registry.openshift-image-registry.svc:5000/test-app/openshift-test-app:latest .
-                '''
-            }
-        }
-
-        stage('Push Image') {
-            steps {
-                echo 'Pushing Docker image to OpenShift registry...'
-                sh '''
-                docker login -u $(oc whoami) -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000
-                docker push image-registry.openshift-image-registry.svc:5000/test-app/openshift-test-app:latest
+                oc new-build --binary --name=openshift-test-app -n test-app || true
+                oc start-build openshift-test-app --from-dir=. -n test-app --follow
                 '''
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application to OpenShift...'
+                echo 'Deploying application...'
                 sh '''
-                oc new-app image-registry.openshift-image-registry.svc:5000/test-app/openshift-test-app:latest --name=openshift-test-app -n test-app || oc rollout latest dc/openshift-test-app -n test-app
+                oc new-app openshift-test-app -n test-app || oc rollout latest dc/openshift-test-app -n test-app
                 oc expose svc/openshift-test-app -n test-app || true
                 '''
             }
+        }
+    }
+    post {
+        success {
+            echo 'Application deployed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
