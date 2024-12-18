@@ -31,11 +31,13 @@ spec:
     stages {
         stage('Build') {
             steps {
-                echo 'Building application...'
-                sh '''
-                npm install
-                tar -czf app.tar.gz *
-                '''
+                container('nodejs') { // 指定在 nodejs 容器中執行
+                    echo 'Building application...'
+                    sh '''
+                    npm install
+                    tar -czf app.tar.gz *
+                    '''
+                }
             }
         }
 
