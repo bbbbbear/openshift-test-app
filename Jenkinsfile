@@ -45,8 +45,8 @@ spec:
             steps {
                 echo 'Building Docker image...'
                 sh '''
-                oc new-build --binary --name=openshift-test-app -n test-app || true
-                oc start-build openshift-test-app --from-dir=. -n test-app --follow
+                oc new-build --binary --name=openshift-test-app || true
+                oc start-build openshift-test-app --from-dir=. --follow
                 '''
             }
         }
