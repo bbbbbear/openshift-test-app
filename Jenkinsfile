@@ -1,5 +1,5 @@
 pipeline {
-    agent none  // 預設無 agent，每個 stage 自行指定
+    agent none  // 不使用全局的 Agent
     stages {
         stage('Build') {
             agent {
@@ -24,8 +24,8 @@ spec:
                 }
             }
             steps {
-                container('nodejs') { // 指定在 nodejs 容器中執行
-                    echo 'Building application...'
+                container('nodejs') { // 在 nodejs 容器中執行
+                    echo '開始構建應用程式...'
                     sh '''
                     npm install
                     tar -czf app.tar.gz *
@@ -35,33 +35,65 @@ spec:
         }
 
         stage('Build Image') {
-            agent { label 'jenkins-node' } // 指定在 Jenkins 節點上執行
+            agent {
+                kubernetes {
+                    yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: oc-cli
+    image: quay.io/openshift/origin-cli:4.10
+    command:
+    - cat
+    tty: true
+"""
+                }
+            }
             steps {
-                echo 'Building Docker image...'
-                sh '''
-                oc new-build --binary --name=openshift-test-app || true
-                oc start-build openshift-test-app --from-dir=. --follow
-                '''
+                container('oc-cli') { // 使用包含 oc 的 OpenShift CLI 容器
+                    echo '構建 Docker 映像...'
+                    sh '''
+                    oc new-build --binary --name=openshift-test-app || true
+                    oc start-build openshift-test-app --from-dir=. --follow
+                    '''
+                }
             }
         }
 
         stage('Deploy') {
-            agent { label 'jenkins-node' } // 指定在 Jenkins 節點上執行
+            agent {
+                kubernetes {
+                    yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: oc-cli
+    image: quay.io/openshift/origin-cli:4.10
+    command:
+    - cat
+    tty: true
+"""
+                }
+            }
             steps {
-                echo 'Deploying application...'
-                sh '''
-                oc new-app openshift-test-app || oc rollout latest dc/openshift-test-app -n test-app
-                oc expose svc/openshift-test-app  || true
-                '''
+                container('oc-cli') { // 使用 OpenShift CLI 容器
+                    echo '部署應用程式...'
+                    sh '''
+                    oc new-app openshift-test-app -n test-app || oc rollout latest dc/openshift-test-app -n test-app
+                    oc expose svc/openshift-test-app -n test-app || true
+                    '''
+                }
             }
         }
     }
     post {
         success {
-            echo 'Application deployed successfully!'
+            echo '應用程式已成功部署！'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo 'Pipeline 執行失敗！'
         }
     }
 }
