@@ -1,7 +1,10 @@
 pipeline {
-    agent{
-        kubernetes {
-            yaml """
+    agent none  // 預設無 agent，每個 stage 自行指定
+    stages {
+        stage('Build') {
+            agent {
+                kubernetes {
+                    yaml """
 apiVersion: v1
 kind: Pod
 spec:
@@ -14,22 +17,12 @@ spec:
     volumeMounts:
     - mountPath: "/home/jenkins/agent"
       name: "workspace-volume"
-  - name: jnlp
-    image: jenkins/inbound-agent:3107.v665000b_51092-15
-    env:
-    - name: HOME
-      value: /home/jenkins/agent
-    volumeMounts:
-    - mountPath: "/home/jenkins/agent"
-      name: "workspace-volume"
   volumes:
   - emptyDir: {}
     name: "workspace-volume"
 """
-        }
-    }
-    stages {
-        stage('Build') {
+                }
+            }
             steps {
                 container('nodejs') { // 指定在 nodejs 容器中執行
                     echo 'Building application...'
@@ -42,6 +35,7 @@ spec:
         }
 
         stage('Build Image') {
+            agent { label 'jenkins-node' } // 指定在 Jenkins 節點上執行
             steps {
                 echo 'Building Docker image...'
                 sh '''
@@ -52,11 +46,12 @@ spec:
         }
 
         stage('Deploy') {
+            agent { label 'jenkins-node' } // 指定在 Jenkins 節點上執行
             steps {
                 echo 'Deploying application...'
                 sh '''
-                oc new-app openshift-test-app -n test-app || oc rollout latest dc/openshift-test-app -n test-app
-                oc expose svc/openshift-test-app -n test-app || true
+                oc new-app openshift-test-app || oc rollout latest dc/openshift-test-app -n test-app
+                oc expose svc/openshift-test-app  || true
                 '''
             }
         }
