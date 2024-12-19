@@ -40,6 +40,9 @@ spec:
                     yaml """
 apiVersion: v1
 kind: Pod
+metadata:
+  annotations:
+    serviceAccountName: jenkins  # 使用 jenkins ServiceAccount
 spec:
   containers:
   - name: oc-cli
