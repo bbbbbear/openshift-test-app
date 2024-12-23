@@ -1,6 +1,16 @@
 pipeline {
     agent none  // 不使用全局的 Agent
     stages {
+        stage('Check Agent') {
+            steps {
+                script {
+                    echo "Running on Agent/Pod: ${env.NODE_NAME}"
+                    echo "Hostname (for Pods): ${env.HOSTNAME}"
+                }
+            }
+        }
+    }
+    stages {
         stage('Build') {
             agent {
                 kubernetes {
