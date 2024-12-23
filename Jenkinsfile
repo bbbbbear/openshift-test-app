@@ -44,36 +44,21 @@ spec:
 
         stage('Build Image') {
             agent any
-                steps {
-                    script{
-
-                        echo '構建 Docker 映像...'
-                        sh '''
-                        oc new-build --binary --name=openshift-test-app || true
-                        oc start-build openshift-test-app --from-dir=. --follow
-                        ''' 
-                    }                
-                }
+            steps {
+                script{
+                    echo '構建 Docker 映像...'
+                    sh '''
+                    oc new-build --binary --name=openshift-test-app || true
+                    oc start-build openshift-test-app --from-dir=. --follow
+                    ''' 
+                }                
+            }
         }
 
         stage('Deploy') {
-            agent {
-                kubernetes {
-                    yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: oc-cli
-    image: quay.io/openshift/origin-cli:4.10
-    command:
-    - cat
-    tty: true
-"""
-                }
-            }
+            agent any
             steps {
-                container('oc-cli') { // 使用 OpenShift CLI 容器
+                script {
                     echo '部署應用程式...'
                     sh '''
                     oc new-app openshift-test-app -n test-app || oc rollout latest dc/openshift-test-app -n test-app
