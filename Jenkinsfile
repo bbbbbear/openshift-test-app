@@ -43,24 +43,7 @@ spec:
         }
 
         stage('Build Image') {
-            agent {
-                kubernetes {
-                    yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    serviceAccountName: jenkins  # 使用 jenkins ServiceAccount
-spec:
-  containers:
-  - name: oc-cli
-    image: quay.io/openshift/origin-cli:4.10
-    command:
-    - cat
-    tty: true
-"""
-                }
-            }
+            agent any
             steps {
                 container('oc-cli') { // 使用包含 oc 的 OpenShift CLI 容器
                     echo '構建 Docker 映像...'
