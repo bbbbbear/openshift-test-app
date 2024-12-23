@@ -1,5 +1,5 @@
 pipeline {
-    agent none  // 不使用全局的 Agent
+    agent any  // 不使用全局的 Agent
     stages {
         stage('Check Agent') {
             steps {
