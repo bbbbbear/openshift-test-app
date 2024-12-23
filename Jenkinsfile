@@ -1,5 +1,5 @@
 pipeline {
-    agent any  // 不使用全局的 Agent
+    agent any
     stages {
         stage('Check Agent') {
             steps {
@@ -32,7 +32,7 @@ spec:
                 }
             }
             steps {
-                container('nodejs') { // 在 nodejs 容器中執行
+                container('nodejs') {
                     echo '開始構建應用程式...'
                     sh '''
                     npm install
@@ -62,7 +62,8 @@ spec:
                     echo '部署應用程式...'
                     sh '''
                     oc new-app openshift-test-app || oc rollout latest dc/openshift-test-app
-                    oc expose svc/openshift-test-app
+                    //oc expose svc/openshift-test-app
+                    oc apply -f route.yaml
                     '''
                 }
             }
