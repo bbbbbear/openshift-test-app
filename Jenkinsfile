@@ -44,15 +44,16 @@ spec:
 
         stage('Build Image') {
             agent any
-            steps {
-                container('oc-cli') { // 使用包含 oc 的 OpenShift CLI 容器
-                    echo '構建 Docker 映像...'
-                    sh '''
-                    oc new-build --binary --name=openshift-test-app || true
-                    oc start-build openshift-test-app --from-dir=. --follow
-                    '''
+                steps {
+                    script{
+
+                        echo '構建 Docker 映像...'
+                        sh '''
+                        oc new-build --binary --name=openshift-test-app || true
+                        oc start-build openshift-test-app --from-dir=. --follow
+                        ''' 
+                    }                
                 }
-            }
         }
 
         stage('Deploy') {
