@@ -61,8 +61,8 @@ spec:
                 script {
                     echo '部署應用程式...'
                     sh '''
-                    oc new-app openshift-test-app || oc rollout latest dc/openshift-test-app
-                    //oc expose svc/openshift-test-app
+                    oc new-app openshift-test-app || oc rollout restart deploy openshift-test-app
+                    #oc expose svc/openshift-test-app
                     oc apply -f route.yaml
                     '''
                 }
