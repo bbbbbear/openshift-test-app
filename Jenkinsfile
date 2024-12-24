@@ -1,14 +1,6 @@
 pipeline {
     agent any
     stages {
-        stage('Check Agent') {
-            steps {
-                script {
-                    echo "Running on Agent/Pod: ${env.NODE_NAME}"
-                    echo "Hostname (for Pods): ${env.HOSTNAME}"
-                }
-            }
-        }
         stage('Build') {
             agent {
                 kubernetes {
@@ -78,4 +70,3 @@ spec:
         }
     }
 }
-//
