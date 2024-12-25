@@ -55,6 +55,8 @@ spec:
                     sh '''
                     oc new-app openshift-test-app || oc rollout restart deploy openshift-test-app
                     #oc expose svc/openshift-test-app
+                    oc set resources deployment openshift-test-app --limits=cpu=500m,memory=256Mi --requests=cpu=250m,memory=128Mi
+                    oc apply -f hpa.yaml
                     oc apply -f route.yaml
                     '''
                 }

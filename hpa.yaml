@@ -1,0 +1,25 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: openshift-test-app
+  namespace: sihaen-dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: openshift-test-app   # 目標 Deployment 的名稱
+  minReplicas: 1               # 最小 Pod 副本數
+  maxReplicas: 5               # 最大 Pod 副本數
+  metrics:
+  - type: Resource             # 資源類型
+    resource:
+      name: cpu                # 基於 CPU 使用率
+      target:
+        type: Utilization
+        averageUtilization: 90 # 目標 CPU 使用率 (百分比)
+  - type: Resource
+    resource:
+      name: memory             # 基於內存使用率
+      target:
+        type: Utilization
+        averageUtilization: 90 # 目標內存使用率 (百分比)
